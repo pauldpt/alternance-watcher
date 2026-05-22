@@ -1,0 +1,56 @@
+name: Veille alternance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      LBA_API_TOKEN: ${{ secrets.LBA_API_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REQUIRE_PERSISTENT_DB: "true"
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      DISCORD_WEBHOOK_URLS: ${{ secrets.DISCORD_WEBHOOK_URLS }}
+      REQUIRE_DISCORD: "true"
+      DISCORD_MENTION: ${{ secrets.DISCORD_MENTION }}
+      DISCORD_USERNAME: "Veille Alternance"
+      OUTPUT_DIR: ./out
+      SEARCH_DEPARTEMENTS: "75,92,93,94,91,78,77,95"
+      TARGET_DIPLOMA_LEVEL: "6"
+      ROME_CODES: "M1801,M1802,M1805,M1806,M1810,M1403"
+      MIN_SCORE: "18"
+      INCLUDE_BROAD_SEARCH: "false"
+      INCLUDE_EXTERNAL_LINKS: "true"
+      INCLUDE_DIRECT_CAREERS: "true"
+      EXTERNAL_SEARCH_LOCATION: "France"
+      EXTERNAL_SEARCH_QUERIES: "alternance devops cloud,alternance data engineer,alternance infrastructure cloud"
+      SMTP_HOST: ""
+      EMAIL_TO: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Run watcher
+        run: python offres_alternance.py --no-email
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offres-alternance-report
+          path: out/
+          if-no-files-found: ignore
