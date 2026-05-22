@@ -1,8 +1,11 @@
-.PHONY: test run dry-run links list export discord
+.PHONY: test run dry-run links list export discord config
 
 test:
 	python3 offres_alternance.py --self-test
 	PYTHONPYCACHEPREFIX=/private/tmp/python-pycache python3 -m py_compile offres_alternance.py
+
+config:
+	python3 offres_alternance.py --check-config
 
 run:
 	python3 offres_alternance.py --no-email

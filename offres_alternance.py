@@ -1165,6 +1165,27 @@ def self_test() -> None:
     print("Self-test OK.")
 
 
+def print_config_status() -> None:
+    load_dotenv(ROOT / ".env")
+    checks = [
+        ("LBA_API_TOKEN", bool(os.getenv("LBA_API_TOKEN", "").strip()), "obligatoire pour appeler l'API"),
+        ("DATABASE_URL", bool(os.getenv("DATABASE_URL", "").strip()), "obligatoire pour le cloud, SQLite en local sinon"),
+        ("DISCORD_WEBHOOK_URL(S)", discord_configured(), "obligatoire pour recevoir les liens dans Discord"),
+        ("OUTPUT_DIR", bool(str(output_dir()).strip()), "dossier des rapports locaux"),
+    ]
+
+    print("Configuration Alternance Watcher")
+    print("--------------------------------")
+    for name, ok, note in checks:
+        status = "OK" if ok else "MANQUANT"
+        print(f"{status:8} {name} - {note}")
+
+    if not os.getenv("DATABASE_URL", "").strip():
+        print("\nCloud: ajoute DATABASE_URL en secret GitHub pour activer Supabase/PostgreSQL.")
+    if not discord_configured():
+        print("Discord: ajoute DISCORD_WEBHOOK_URL en secret GitHub et dans .env pour les tests locaux.")
+
+
 def print_offer_rows(rows: list[Any]) -> None:
     if not rows:
         print("Aucune offre en base.")
@@ -1197,6 +1218,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--test-email", action="store_true", help="Envoie un email de test puis quitte.")
     parser.add_argument("--test-discord", action="store_true", help="Envoie un message Discord de test puis quitte.")
     parser.add_argument("--self-test", action="store_true", help="Teste le scoring sans appeler l'API.")
+    parser.add_argument("--check-config", action="store_true", help="Verifie la configuration sans afficher les secrets.")
     parser.add_argument("--output-dir", help="Dossier ou ecrire les fichiers d'offres.")
     parser.add_argument("--list-offers", action="store_true", help="Liste les offres sauvegardees.")
     parser.add_argument("--status", default="", help="Filtre ou nouveau statut candidature.")
@@ -1217,6 +1239,10 @@ def main() -> int:
 
     if args.self_test:
         self_test()
+        return 0
+
+    if args.check_config:
+        print_config_status()
         return 0
 
     store = JobStore.open()

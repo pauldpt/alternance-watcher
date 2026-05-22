@@ -75,6 +75,7 @@ Lance les tests locaux:
 
 ```bash
 python3 offres_alternance.py --self-test
+python3 offres_alternance.py --check-config
 python3 offres_alternance.py --test-discord
 ```
 
@@ -115,6 +116,14 @@ Secrets optionnels:
 
 Guide complet: [docs/SETUP_CLOUD.md](docs/SETUP_CLOUD.md)
 
+Etat actuel attendu au debut:
+
+- `LBA_API_TOKEN` configure: le script peut interroger l'API.
+- `DATABASE_URL` manquant: le cloud ne garde pas encore l'historique entre les runs.
+- `DISCORD_WEBHOOK_URL` manquant: les offres ne partent pas encore dans un salon Discord.
+
+Quand `DATABASE_URL` et `DISCORD_WEBHOOK_URL` seront ajoutes dans les secrets GitHub, le workflow passera automatiquement du mode verification au mode veille.
+
 ## Commandes utiles
 
 Lister les offres sauvegardees:
@@ -133,6 +142,12 @@ Exporter le suivi de candidatures:
 
 ```bash
 python3 offres_alternance.py --export-csv
+```
+
+Verifier la configuration sans afficher les secrets:
+
+```bash
+python3 offres_alternance.py --check-config
 ```
 
 Generer seulement les liens de recherche externes:
