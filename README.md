@@ -1,167 +1,168 @@
 # Alternance Watcher
 
-Automated Cloud/Data/DevOps apprenticeship monitoring pipeline.
+Pipeline automatise de veille d'offres d'alternance Cloud/Data/DevOps.
 
-This project ingests apprenticeship offers from the official La Bonne Alternance API, scores them against a Cloud/Data/DevOps target profile, deduplicates already-notified jobs, stores the history in SQLite or PostgreSQL/Supabase, and sends new opportunities to Discord.
+Ce projet interroge l'API officielle La Bonne Alternance, score les offres selon un profil cible Cloud/Data/DevOps, evite les doublons, stocke l'historique dans SQLite ou PostgreSQL/Supabase, puis envoie les nouvelles opportunites dans Discord.
 
-## Why This Project
+## Pourquoi ce projet
 
-The goal is not only to aggregate job offers. The pipeline is built to:
+L'objectif n'est pas seulement d'agreger des offres. Le pipeline sert a:
 
-- detect new relevant apprenticeship offers;
-- send fast Discord notifications;
-- rank offers according to a target Cloud/Data/DevOps profile;
-- avoid duplicate alerts;
-- keep a database of offers and application status;
-- run locally or as a cloud-scheduled GitHub Actions workflow.
+- detecter les nouvelles offres pertinentes;
+- envoyer rapidement les liens dans Discord;
+- classer les offres selon un profil Cloud/Data/DevOps;
+- eviter les alertes en double;
+- conserver un historique en base de donnees;
+- suivre les candidatures avec des statuts;
+- tourner en local ou automatiquement dans le cloud via GitHub Actions.
 
-## Tech Stack
+## Stack technique
 
 - Python 3.11
-- La Bonne Alternance API
-- SQLite for local runs
-- PostgreSQL/Supabase for cloud persistence
-- GitHub Actions scheduled workflow
-- Discord webhooks
-- Markdown and CSV reporting
+- API La Bonne Alternance
+- SQLite en local
+- PostgreSQL/Supabase en cloud
+- GitHub Actions planifie toutes les 30 minutes
+- Discord Webhooks
+- Rapports Markdown et CSV
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A["GitHub Actions<br/>every 30 min"] --> B["Python watcher"]
-    B --> C["La Bonne Alternance API"]
+    A["GitHub Actions<br/>toutes les 30 min"] --> B["Script Python"]
+    B --> C["API La Bonne Alternance"]
     C --> B
-    B --> D["Scoring engine"]
-    D --> E["SQLite locally<br/>PostgreSQL/Supabase in cloud"]
-    E --> F{"Already notified?"}
-    F -->|No| G["Discord notification"]
-    F -->|Yes| H["Skip duplicate"]
-    B --> I["Markdown / CSV reports"]
+    B --> D["Scoring Cloud/Data/DevOps"]
+    D --> E["SQLite en local<br/>PostgreSQL/Supabase en cloud"]
+    E --> F{"Deja notifiee ?"}
+    F -->|Non| G["Notification Discord"]
+    F -->|Oui| H["Ignore le doublon"]
+    B --> I["Rapports Markdown / CSV"]
 ```
 
-More details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Features
+## Fonctionnalites
 
-- API ingestion by ROME codes and diploma level.
-- Scoring based on Cloud, DevOps, Data Engineering, Infrastructure, SRE, MLOps, Linux, Docker, Kubernetes, Azure, AWS and Terraform keywords.
-- Priority boost for target companies such as CGI, Capgemini, Thales, Orange Business, OVHcloud, Sopra Steria, EDF, Microsoft, AWS and Airbus.
-- Negative filtering for less relevant roles such as pure Business Analyst, HR, helpdesk, QA-only or Excel-only reporting roles.
-- Persistent deduplication with `notified_at`.
-- Discord notifications with embeds.
-- Optional email notifications.
-- Application tracking statuses: `new`, `to_apply`, `applied`, `follow_up`, `rejected`, `ignored`.
-- Local Markdown reports and CSV export.
-- GitHub Actions workflow for cloud scheduling.
+- Ingestion d'offres via API par codes ROME et niveau de diplome.
+- Scoring selon les mots-cles Cloud, DevOps, Data Engineering, Infrastructure, SRE, MLOps, Linux, Docker, Kubernetes, Azure, AWS et Terraform.
+- Bonus pour les entreprises ciblees: CGI, Capgemini, Thales, Orange Business, OVHcloud, Sopra Steria, EDF, Microsoft, AWS et Airbus.
+- Penalisation des offres moins pertinentes: Business Analyst pur, RH, helpdesk, QA uniquement, reporting Excel pur.
+- Deduplication persistante avec le champ `notified_at`.
+- Notifications Discord avec embeds.
+- Notifications email optionnelles.
+- Suivi des candidatures avec statuts: `new`, `to_apply`, `applied`, `follow_up`, `rejected`, `ignored`.
+- Rapports locaux Markdown et export CSV.
+- Workflow GitHub Actions pour l'execution cloud.
 
-## Local Setup
+## Installation locale
 
-Create a `.env` file:
+Cree un fichier `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Fill at least:
+Renseigne au minimum:
 
 ```bash
 LBA_API_TOKEN=...
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 ```
 
-Run local tests:
+Lance les tests locaux:
 
 ```bash
 python3 offres_alternance.py --self-test
 python3 offres_alternance.py --test-discord
 ```
 
-Run the watcher locally:
+Lance la veille en local:
 
 ```bash
 python3 offres_alternance.py --no-email
 ```
 
-Local outputs are written to:
+Les fichiers locaux sont ecrits ici:
 
 ```text
 /Users/paul/Documents/Offres Alternance
 ```
 
-## Cloud Setup
+## Deploiement cloud
 
-The GitHub Actions workflow is already included:
+Le workflow GitHub Actions est deja inclus:
 
 ```text
 .github/workflows/veille-alternance.yml
 ```
 
-It runs every 30 minutes and requires persistent PostgreSQL/Supabase storage to avoid duplicate notifications between runs.
+Il tourne toutes les 30 minutes et utilise PostgreSQL/Supabase pour garder l'historique entre deux executions.
 
-Required GitHub Actions secrets:
+Secrets GitHub Actions requis:
 
 - `LBA_API_TOKEN`
 - `DATABASE_URL`
 - `DISCORD_WEBHOOK_URL`
 
-Optional:
+Secrets optionnels:
 
 - `DISCORD_MENTION`
 - `DISCORD_WEBHOOK_URLS`
 
-Full guide: [docs/SETUP_CLOUD.md](docs/SETUP_CLOUD.md)
+Guide complet: [docs/SETUP_CLOUD.md](docs/SETUP_CLOUD.md)
 
-## Commands
+## Commandes utiles
 
-List saved offers:
+Lister les offres sauvegardees:
 
 ```bash
 python3 offres_alternance.py --list-offers --max 20
 ```
 
-Mark an offer as applied:
+Marquer une offre comme postulee:
 
 ```bash
-python3 offres_alternance.py --set-status "France Travail:123" --status applied --notes "CV sent"
+python3 offres_alternance.py --set-status "France Travail:123" --status applied --notes "CV envoye"
 ```
 
-Export application tracking:
+Exporter le suivi de candidatures:
 
 ```bash
 python3 offres_alternance.py --export-csv
 ```
 
-Generate external search links only:
+Generer seulement les liens de recherche externes:
 
 ```bash
 python3 offres_alternance.py --links-only
 ```
 
-## Environment Variables
+## Variables d'environnement
 
-Important variables:
+Variables principales:
 
-- `LBA_API_TOKEN`: La Bonne Alternance API token.
-- `DATABASE_URL`: PostgreSQL/Supabase URL. Empty means local SQLite.
-- `REQUIRE_PERSISTENT_DB=true`: force PostgreSQL in cloud.
-- `DISCORD_WEBHOOK_URL`: Discord channel webhook.
-- `DISCORD_WEBHOOK_URLS`: multiple Discord webhooks separated by commas.
-- `DISCORD_MENTION`: optional Discord user or role mention.
-- `SEARCH_DEPARTEMENTS`: French departments to search.
-- `TARGET_DIPLOMA_LEVEL=6`: Bac+3 / BUT3 target level.
-- `MIN_SCORE`: minimum relevance score.
+- `LBA_API_TOKEN`: token API La Bonne Alternance.
+- `DATABASE_URL`: URL PostgreSQL/Supabase. Vide = SQLite local.
+- `REQUIRE_PERSISTENT_DB=true`: force l'utilisation de PostgreSQL en cloud.
+- `DISCORD_WEBHOOK_URL`: webhook Discord du salon cible.
+- `DISCORD_WEBHOOK_URLS`: plusieurs webhooks Discord separes par des virgules.
+- `DISCORD_MENTION`: mention optionnelle d'un utilisateur ou d'un role Discord.
+- `SEARCH_DEPARTEMENTS`: departements francais a surveiller.
+- `TARGET_DIPLOMA_LEVEL=6`: niveau Bac+3 / BUT3.
+- `MIN_SCORE`: score minimum de pertinence.
 
-## Security
+## Securite
 
-Secrets must never be committed.
+Les secrets ne doivent jamais etre commits.
 
-The repository ignores `.env`, local databases, logs and generated reports through `.gitignore`.
+Le repo ignore `.env`, les bases locales, les logs et les rapports generes via `.gitignore`.
 
-If a token was exposed, revoke it and generate a new one.
+Si un token est expose, il faut le revoquer et en generer un nouveau.
 
-## CV Pitch
+## Formulation CV
 
-> Developed an automated Cloud/Data/DevOps apprenticeship monitoring pipeline using API ingestion, scoring, deduplication, PostgreSQL persistence, scheduled GitHub Actions runs and Discord webhook notifications.
+> Developpement d'un pipeline automatise de veille d'alternances Cloud/Data/DevOps: ingestion API, scoring metier, deduplication, persistance PostgreSQL/Supabase, execution planifiee GitHub Actions et notifications Discord.
 
-More profile material: [docs/CV_LINKEDIN.md](docs/CV_LINKEDIN.md)
+Supports CV/LinkedIn: [docs/CV_LINKEDIN.md](docs/CV_LINKEDIN.md)

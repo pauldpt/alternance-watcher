@@ -1,4 +1,4 @@
-# Setup cloud GitHub Actions + Supabase
+# Deploiement cloud GitHub Actions + Supabase
 
 ## 1. Creer le repo GitHub
 
@@ -41,7 +41,7 @@ Ajoute:
 - `DISCORD_WEBHOOK_URL`
 - optionnel: `DISCORD_MENTION`
 
-## 4. Lancer
+## 4. Lancer le workflow
 
 Va dans `Actions` -> `Veille alternance` -> `Run workflow`.
 
@@ -61,7 +61,7 @@ Avec Discord:
 python3 offres_alternance.py --no-email
 ```
 
-## 6. Export suivi candidatures
+## 6. Export du suivi de candidatures
 
 ```bash
 python3 offres_alternance.py --export-csv
