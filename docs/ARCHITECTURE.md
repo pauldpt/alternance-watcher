@@ -6,6 +6,7 @@ Automatiser une veille d'alternances Cloud/Data/DevOps:
 
 - ingestion d'offres via API;
 - scoring selon le profil cible;
+- priorisation des entreprises ciblees;
 - deduplication;
 - stockage durable;
 - notification Discord;
@@ -19,7 +20,8 @@ flowchart LR
     B --> C["API La Bonne Alternance"]
     C --> B
     B --> D["Scoring Cloud/Data/DevOps"]
-    D --> E["PostgreSQL / Supabase"]
+    D --> J["Priorisation entreprises ciblees"]
+    J --> E["PostgreSQL / Supabase"]
     E --> F{"Offre deja notifiee ?"}
     F -->|Non| G["Discord Webhook"]
     F -->|Oui| H["Silence"]
@@ -44,6 +46,25 @@ Tables principales:
 
 - `offers`: offres, score, statut de candidature, notification.
 - `runs`: historique des executions.
+
+## Scoring et priorisation
+
+Le scoring donne une note aux offres selon:
+
+- les mots-cles Cloud/Data/DevOps dans le titre;
+- les technologies presentes dans la description;
+- les entreprises ciblees;
+- les signaux negatifs a eviter.
+
+Les entreprises ciblees ne recoivent pas seulement un bonus de score. Elles passent aussi en priorite dans l'ordre d'affichage quand le nombre d'offres est limite.
+
+Ordre final:
+
+1. offres venant d'entreprises ciblees;
+2. score le plus eleve;
+3. date de publication la plus recente.
+
+Details: [SCORING_PRIORITES.md](SCORING_PRIORITES.md)
 
 ## Statuts candidature
 
@@ -83,3 +104,4 @@ Ce projet montre:
 - notifications webhook;
 - reporting;
 - logique de scoring metier.
+- priorisation metier explicite des opportunites.

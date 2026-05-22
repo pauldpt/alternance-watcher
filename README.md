@@ -2,7 +2,7 @@
 
 Pipeline automatise de veille d'offres d'alternance Cloud/Data/DevOps.
 
-Ce projet interroge l'API officielle La Bonne Alternance, score les offres selon un profil cible Cloud/Data/DevOps, evite les doublons, stocke l'historique dans SQLite ou PostgreSQL/Supabase, puis envoie les nouvelles opportunites dans Discord.
+Ce projet interroge l'API officielle La Bonne Alternance, score les offres selon un profil cible Cloud/Data/DevOps, priorise les entreprises strategiques, evite les doublons, stocke l'historique dans SQLite ou PostgreSQL/Supabase, puis envoie les nouvelles opportunites dans Discord.
 
 ## Pourquoi ce projet
 
@@ -11,6 +11,7 @@ L'objectif n'est pas seulement d'agreger des offres. Le pipeline sert a:
 - detecter les nouvelles offres pertinentes;
 - envoyer rapidement les liens dans Discord;
 - classer les offres selon un profil Cloud/Data/DevOps;
+- faire remonter d'abord les entreprises ciblees quand il y a trop d'offres;
 - eviter les alertes en double;
 - conserver un historique en base de donnees;
 - suivre les candidatures avec des statuts;
@@ -34,7 +35,8 @@ flowchart LR
     B --> C["API La Bonne Alternance"]
     C --> B
     B --> D["Scoring Cloud/Data/DevOps"]
-    D --> E["SQLite en local<br/>PostgreSQL/Supabase en cloud"]
+    D --> J["Priorisation entreprises ciblees"]
+    J --> E["SQLite en local<br/>PostgreSQL/Supabase en cloud"]
     E --> F{"Deja notifiee ?"}
     F -->|Non| G["Notification Discord"]
     F -->|Oui| H["Ignore le doublon"]
@@ -48,6 +50,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Ingestion d'offres via API par codes ROME et niveau de diplome.
 - Scoring selon les mots-cles Cloud, DevOps, Data Engineering, Infrastructure, SRE, MLOps, Linux, Docker, Kubernetes, Azure, AWS et Terraform.
 - Bonus pour les entreprises ciblees: CGI, Capgemini, Thales, Orange Business, OVHcloud, Sopra Steria, EDF, Microsoft, AWS et Airbus.
+- Priorisation dure des entreprises ciblees: si trop d'offres sont trouvees, elles passent avant les autres dans Discord et dans les rapports.
 - Penalisation des offres moins pertinentes: Business Analyst pur, RH, helpdesk, QA uniquement, reporting Excel pur.
 - Deduplication persistante avec le champ `notified_at`.
 - Notifications Discord avec embeds.
@@ -55,6 +58,8 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Suivi des candidatures avec statuts: `new`, `to_apply`, `applied`, `follow_up`, `rejected`, `ignored`.
 - Rapports locaux Markdown et export CSV.
 - Workflow GitHub Actions pour l'execution cloud.
+
+Details du scoring: [docs/SCORING_PRIORITES.md](docs/SCORING_PRIORITES.md)
 
 ## Installation locale
 
@@ -116,13 +121,7 @@ Secrets optionnels:
 
 Guide complet: [docs/SETUP_CLOUD.md](docs/SETUP_CLOUD.md)
 
-Etat actuel attendu au debut:
-
-- `LBA_API_TOKEN` configure: le script peut interroger l'API.
-- `DATABASE_URL` manquant: le cloud ne garde pas encore l'historique entre les runs.
-- `DISCORD_WEBHOOK_URL` manquant: les offres ne partent pas encore dans un salon Discord.
-
-Quand `DATABASE_URL` et `DISCORD_WEBHOOK_URL` seront ajoutes dans les secrets GitHub, le workflow passera automatiquement du mode verification au mode veille.
+Quand les trois secrets requis sont configures, le workflow tourne en veille toutes les 30 minutes. S'il manque un secret, le workflow reste vert mais ignore la veille pour eviter les faux echecs pendant la configuration.
 
 ## Commandes utiles
 

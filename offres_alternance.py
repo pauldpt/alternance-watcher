@@ -225,6 +225,17 @@ def contains_phrase(text: str, phrase: str) -> bool:
     return phrase_folded in text_folded
 
 
+def priority_company_name(company: str) -> str:
+    for company_name in PREFERRED_COMPANIES:
+        if contains_phrase(company, company_name):
+            return company_name
+    return ""
+
+
+def is_priority_company(company: str) -> bool:
+    return bool(priority_company_name(company))
+
+
 def first_non_empty(*values: Any) -> str:
     for value in values:
         if isinstance(value, str) and value.strip():
@@ -785,11 +796,10 @@ def score_job(raw: dict[str, Any]) -> tuple[int, list[str]]:
     score = 0
     reasons: list[str] = []
 
-    for company_name in PREFERRED_COMPANIES:
-        if contains_phrase(company, company_name):
-            score += 45
-            reasons.append(f"entreprise prioritaire: {company_name}")
-            break
+    company_priority = priority_company_name(company)
+    if company_priority:
+        score += 45
+        reasons.append(f"entreprise prioritaire: {company_priority}")
 
     for keyword in TITLE_KEYWORDS:
         if contains_phrase(title_text, keyword):
@@ -879,7 +889,15 @@ def collect_jobs() -> list[Job]:
         if previous is None or job.score > previous.score:
             deduped[job.uid] = job
 
-    return sorted(deduped.values(), key=lambda job: (job.score, job.created_at), reverse=True)
+    return prioritize_jobs(list(deduped.values()))
+
+
+def prioritize_jobs(jobs: list[Job]) -> list[Job]:
+    return sorted(
+        jobs,
+        key=lambda job: (is_priority_company(job.company), job.score, job.created_at),
+        reverse=True,
+    )
 
 
 def load_seen() -> set[str]:
@@ -918,6 +936,7 @@ def markdown_report(jobs: list[Job], title: str, empty_message: str | None = Non
                 f"## {index}. {job.title}",
                 "",
                 f"- Entreprise: {job.company}",
+                f"- Priorite entreprise: {'oui' if is_priority_company(job.company) else 'non'}",
                 f"- Score: {job.score}",
                 f"- Source: {job.partner}",
                 f"- Lieu: {job.location or 'Non precise'}",
@@ -1166,6 +1185,37 @@ def self_test() -> None:
     assert job.score >= 80, job
     assert "CGI" in job.company
     assert job.uid == "France Travail:123"
+    priority_low_score = Job(
+        uid="priority",
+        title="Alternance infrastructure",
+        company="CGI",
+        location="Paris",
+        url="https://example.com/priority",
+        partner="test",
+        created_at="2026-05-20T08:00:00Z",
+        contract="Apprentissage",
+        remote="",
+        rome_codes="M1801",
+        score=30,
+        reasons=["entreprise prioritaire: CGI"],
+        description="Offre prioritaire par entreprise.",
+    )
+    regular_high_score = Job(
+        uid="regular",
+        title="Alternance cloud data",
+        company="Entreprise non prioritaire",
+        location="Paris",
+        url="https://example.com/regular",
+        partner="test",
+        created_at="2026-05-22T08:00:00Z",
+        contract="Apprentissage",
+        remote="",
+        rome_codes="M1801",
+        score=140,
+        reasons=["titre: cloud"],
+        description="Offre tres scoree mais hors entreprises ciblees.",
+    )
+    assert prioritize_jobs([regular_high_score, priority_low_score])[0].uid == "priority"
     print("Self-test OK.")
 
 
@@ -1302,9 +1352,9 @@ def main() -> int:
     try:
         jobs = collect_jobs()
         if args.dry_run:
-            fresh_jobs = store.unnotified_jobs(jobs)[: args.max]
+            fresh_jobs = prioritize_jobs(store.unnotified_jobs(jobs))[: args.max]
         else:
-            fresh_jobs = store.upsert_jobs(jobs)[: args.max]
+            fresh_jobs = prioritize_jobs(store.upsert_jobs(jobs))[: args.max]
 
         notified_count = 0
         if fresh_jobs:
