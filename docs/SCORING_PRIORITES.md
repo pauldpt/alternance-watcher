@@ -45,6 +45,10 @@ Ces entreprises ont deux avantages:
 
 Le score augmente avec les signaux suivants:
 
+- Bac+3
+- BUT3
+- Licence
+- niveau 6
 - DevOps
 - Cloud
 - Data Engineer
@@ -66,6 +70,8 @@ Le score augmente avec les signaux suivants:
 - ETL
 
 Les mots dans le titre valent plus que les mots dans la description.
+
+Les offres qui indiquent clairement Bac+3, BUT3, Licence ou niveau 6 recoivent aussi un bonus, parce qu'elles correspondent mieux a une recherche d'alternance en 3eme annee d'IUT / BUT.
 
 ## Signaux negatifs
 

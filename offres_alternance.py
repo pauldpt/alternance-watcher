@@ -68,6 +68,22 @@ PREFERRED_COMPANIES = [
     "Airbus",
 ]
 
+BAC3_KEYWORDS = [
+    "bac+3",
+    "bac +3",
+    "bac 3",
+    "niveau 6",
+    "rncp niveau 6",
+    "but3",
+    "but 3",
+    "licence",
+    "licence 3",
+    "l3",
+    "bachelor",
+    "3e annee",
+    "3eme annee",
+]
+
 TITLE_KEYWORDS = [
     "devops",
     "cloud",
@@ -234,6 +250,24 @@ def priority_company_name(company: str) -> str:
 
 def is_priority_company(company: str) -> bool:
     return bool(priority_company_name(company))
+
+
+def has_bac3_signal(raw: dict[str, Any], title: str, description: str) -> bool:
+    text = " ".join([title, description, json.dumps(raw, ensure_ascii=False)])
+    if any(contains_phrase(text, keyword) for keyword in BAC3_KEYWORDS):
+        return True
+
+    def walk(value: Any, parent_key: str = "") -> bool:
+        key_text = fold(parent_key)
+        if isinstance(value, dict):
+            return any(walk(child, key) for key, child in value.items())
+        if isinstance(value, list):
+            return any(walk(child, parent_key) for child in value)
+        if key_text and any(signal in key_text for signal in ["diploma", "niveau", "level"]):
+            return str(value).strip() == "6"
+        return False
+
+    return walk(raw)
 
 
 def first_non_empty(*values: Any) -> str:
@@ -801,6 +835,10 @@ def score_job(raw: dict[str, Any]) -> tuple[int, list[str]]:
         score += 45
         reasons.append(f"entreprise prioritaire: {company_priority}")
 
+    if has_bac3_signal(raw, title, description):
+        score += 22
+        reasons.append("niveau prioritaire: Bac+3/BUT3")
+
     for keyword in TITLE_KEYWORDS:
         if contains_phrase(title_text, keyword):
             score += 18
@@ -1190,9 +1228,10 @@ def self_test() -> None:
         "contract": {"type": ["Apprentissage"], "remote": "hybrid"},
         "offer": {
             "title": "Alternance DevOps Cloud",
-            "description": "Python, Linux, Docker, Terraform, pipelines CI/CD",
+            "description": "Python, Linux, Docker, Terraform, pipelines CI/CD. Niveau Bac+3 / BUT3 recherche.",
             "desired_skills": ["Python", "SQL"],
             "to_be_acquired_skills": ["Kubernetes", "Azure"],
+            "target_diploma_level": 6,
             "rome_codes": ["M1801"],
             "publication": {"creation": "2026-05-22T08:00:00Z"},
         },
@@ -1201,6 +1240,7 @@ def self_test() -> None:
     assert job.score >= 80, job
     assert "CGI" in job.company
     assert job.uid == "France Travail:123"
+    assert any("Bac+3" in reason for reason in job.reasons), job.reasons
     priority_low_score = Job(
         uid="priority",
         title="Alternance infrastructure",

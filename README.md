@@ -50,6 +50,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Ingestion d'offres via API par codes ROME et niveau de diplome.
 - Scoring selon les mots-cles Cloud, DevOps, Data Engineering, Infrastructure, SRE, MLOps, Linux, Docker, Kubernetes, Azure, AWS et Terraform.
 - Bonus pour les entreprises ciblees: CGI, Capgemini, Thales, Orange Business, OVHcloud, Sopra Steria, EDF, Microsoft, AWS et Airbus.
+- Bonus de score pour les offres clairement adaptees Bac+3 / BUT3 / Licence / niveau 6.
 - Priorisation dure des entreprises ciblees: si trop d'offres sont trouvees, elles passent avant les autres dans Discord et dans les rapports.
 - Penalisation des offres moins pertinentes: Business Analyst pur, RH, helpdesk, QA uniquement, reporting Excel pur.
 - Deduplication persistante avec le champ `notified_at`.

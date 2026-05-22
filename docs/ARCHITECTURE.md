@@ -51,6 +51,7 @@ Tables principales:
 
 Le scoring donne une note aux offres selon:
 
+- l'adequation Bac+3 / BUT3 / Licence / niveau 6;
 - les mots-cles Cloud/Data/DevOps dans le titre;
 - les technologies presentes dans la description;
 - les entreprises ciblees;
