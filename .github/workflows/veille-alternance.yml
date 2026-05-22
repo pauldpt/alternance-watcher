@@ -3,7 +3,9 @@ name: Veille alternance
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"
+    # GitHub peut retarder ou ignorer des schedules sur les minutes tres chargees
+    # comme 00 et 30. On decale pour rendre le cron plus fiable.
+    - cron: "7,37 * * * *"
 
 jobs:
   watch:

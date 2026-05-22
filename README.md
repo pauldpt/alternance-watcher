@@ -23,7 +23,7 @@ L'objectif n'est pas seulement d'agreger des offres. Le pipeline sert a:
 - API La Bonne Alternance
 - SQLite en local
 - PostgreSQL/Supabase en cloud
-- GitHub Actions planifie toutes les 30 minutes
+- GitHub Actions planifie toutes les 30 minutes, aux minutes 07 et 37
 - Discord Webhooks
 - Rapports Markdown et CSV
 
@@ -106,7 +106,9 @@ Le workflow GitHub Actions est deja inclus:
 .github/workflows/veille-alternance.yml
 ```
 
-Il tourne toutes les 30 minutes et utilise PostgreSQL/Supabase pour garder l'historique entre deux executions.
+Il tourne toutes les 30 minutes, aux minutes 07 et 37, et utilise PostgreSQL/Supabase pour garder l'historique entre deux executions.
+
+Le bot n'envoie pas de message Discord quand aucune nouvelle offre n'est detectee. Dans ce cas, le run GitHub Actions reste vert et ecrit seulement un statut dans l'artefact `offres-alternance-report`.
 
 Tant que les secrets cloud ne sont pas configures, le workflow lance seulement les checks Python puis ignore la veille. Cela evite les runs rouges sur GitHub avant la configuration complete.
 

@@ -45,7 +45,9 @@ Ajoute:
 
 Va dans `Actions` -> `Veille alternance` -> `Run workflow`.
 
-Ensuite le workflow tourne toutes les 30 minutes.
+Ensuite le workflow tourne toutes les 30 minutes, aux minutes 07 et 37.
+
+Le bot n'envoie rien sur Discord quand aucune nouvelle offre n'est detectee. Pour verifier qu'il tourne quand meme, va dans `Actions` -> `Veille alternance`: un run vert avec `Aucune nouvelle offre` signifie que la veille fonctionne.
 
 Si `DATABASE_URL` ou `DISCORD_WEBHOOK_URL` manque, le workflow reste vert mais ignore la veille. C'est volontaire pour garder un repo propre tant que la configuration cloud n'est pas terminee.
 
