@@ -166,6 +166,7 @@ Variables principales:
 - `DISCORD_WEBHOOK_URL`: webhook Discord du salon cible.
 - `DISCORD_WEBHOOK_URLS`: plusieurs webhooks Discord separes par des virgules.
 - `DISCORD_MENTION`: mention optionnelle d'un utilisateur ou d'un role Discord.
+- `DISCORD_BATCH_SIZE`: nombre d'offres par message Discord, 5 par defaut pour respecter les limites Discord.
 - `SEARCH_DEPARTEMENTS`: departements francais a surveiller.
 - `TARGET_DIPLOMA_LEVEL=6`: niveau Bac+3 / BUT3.
 - `MIN_SCORE`: score minimum de pertinence.

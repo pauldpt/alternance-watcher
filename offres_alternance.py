@@ -1001,13 +1001,13 @@ def job_to_discord_embed(job: Job) -> dict[str, Any]:
         {"name": "Entreprise", "value": job.company or "Non precise", "inline": True},
         {"name": "Score", "value": str(job.score), "inline": True},
         {"name": "Source", "value": job.partner or "Non precise", "inline": True},
-        {"name": "Lieu", "value": shorten(job.location or "Non precise", 180), "inline": False},
-        {"name": "Pourquoi", "value": shorten(reasons, 240), "inline": False},
+        {"name": "Lieu", "value": shorten(job.location or "Non precise", 120), "inline": False},
+        {"name": "Pourquoi", "value": shorten(reasons, 160), "inline": False},
     ]
     return {
-        "title": shorten(job.title, 250),
+        "title": shorten(job.title, 180),
         "url": job.url,
-        "description": shorten(job.description, 520),
+        "description": shorten(job.description, 260),
         "color": 0x1F8B4C,
         "fields": fields,
     }
@@ -1024,11 +1024,12 @@ def send_discord(jobs: list[Job]) -> bool:
     mention = os.getenv("DISCORD_MENTION", "").strip()
     username = os.getenv("DISCORD_USERNAME", "Veille Alternance").strip() or "Veille Alternance"
     max_jobs = env_int("DISCORD_MAX_OFFERS", len(jobs))
+    batch_size = min(10, max(1, env_int("DISCORD_BATCH_SIZE", 5)))
     jobs_to_send = jobs[:max_jobs]
 
     for webhook_url in webhooks:
-        for start in range(0, len(jobs_to_send), 10):
-            batch = jobs_to_send[start : start + 10]
+        for start in range(0, len(jobs_to_send), batch_size):
+            batch = jobs_to_send[start : start + batch_size]
             payload = {
                 "username": username,
                 "content": f"{mention} {len(batch)} nouvelle(s) offre(s) alternance trouvee(s).".strip(),
