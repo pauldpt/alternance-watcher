@@ -44,7 +44,28 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
+      - name: Run local checks
+        run: |
+          python offres_alternance.py --self-test
+          python -m py_compile offres_alternance.py
+
+      - name: Check cloud secrets
+        run: |
+          if [ -z "$LBA_API_TOKEN" ]; then
+            echo "::notice::Secret LBA_API_TOKEN manquant. La veille cloud est ignoree."
+            echo "RUN_WATCHER=false" >> "$GITHUB_ENV"
+          elif [ -z "$DATABASE_URL" ]; then
+            echo "::notice::Secret DATABASE_URL manquant. La veille cloud est ignoree."
+            echo "RUN_WATCHER=false" >> "$GITHUB_ENV"
+          elif [ -z "$DISCORD_WEBHOOK_URL" ] && [ -z "$DISCORD_WEBHOOK_URLS" ]; then
+            echo "::notice::Secret DISCORD_WEBHOOK_URL ou DISCORD_WEBHOOK_URLS manquant. La veille cloud est ignoree."
+            echo "RUN_WATCHER=false" >> "$GITHUB_ENV"
+          else
+            echo "RUN_WATCHER=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Run watcher
+        if: env.RUN_WATCHER == 'true'
         run: python offres_alternance.py --no-email
 
       - name: Upload report artifact

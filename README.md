@@ -100,6 +100,8 @@ Le workflow GitHub Actions est deja inclus:
 
 Il tourne toutes les 30 minutes et utilise PostgreSQL/Supabase pour garder l'historique entre deux executions.
 
+Tant que les secrets cloud ne sont pas configures, le workflow lance seulement les checks Python puis ignore la veille. Cela evite les runs rouges sur GitHub avant la configuration complete.
+
 Secrets GitHub Actions requis:
 
 - `LBA_API_TOKEN`

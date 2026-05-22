@@ -47,6 +47,8 @@ Va dans `Actions` -> `Veille alternance` -> `Run workflow`.
 
 Ensuite le workflow tourne toutes les 30 minutes.
 
+Si `DATABASE_URL` ou `DISCORD_WEBHOOK_URL` manque, le workflow reste vert mais ignore la veille. C'est volontaire pour garder un repo propre tant que la configuration cloud n'est pas terminee.
+
 ## 5. Tester en local
 
 Sans envoyer Discord:
