@@ -105,7 +105,23 @@ Plus le seuil est bas, plus le bot envoie d'offres. Plus il est haut, plus les o
 `DISCORD_MAX_OFFERS` controle le nombre maximum d'offres envoyees dans Discord par run.
 
 ```text
-DISCORD_MAX_OFFERS=10
+DISCORD_MAX_OFFERS=20
 ```
 
-Si 30 offres nouvelles arrivent et que Discord en affiche 10, les entreprises ciblees passent d'abord.
+Si 50 offres nouvelles arrivent et que Discord en affiche 20, le bot garde les 20 premieres apres tri:
+
+1. entreprises ciblees;
+2. meilleur score;
+3. offres les plus recentes.
+
+`DISCORD_BATCH_SIZE` controle l'organisation des messages Discord.
+
+```text
+DISCORD_BATCH_SIZE=5
+```
+
+Avec 20 offres, Discord recoit donc 4 messages de 5 offres. Chaque titre contient le rang et le score:
+
+```text
+#01 | score 92 | entreprise ciblee | Alternance DevOps Cloud
+```

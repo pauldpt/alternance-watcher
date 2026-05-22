@@ -1017,20 +1017,32 @@ def discord_configured() -> bool:
     return bool(discord_webhooks())
 
 
-def job_to_discord_embed(job: Job) -> dict[str, Any]:
+def score_label(score: int) -> str:
+    if score >= 90:
+        return "excellent"
+    if score >= 60:
+        return "tres bon"
+    if score >= 35:
+        return "bon"
+    return "a verifier"
+
+
+def job_to_discord_embed(job: Job, rank: int) -> dict[str, Any]:
     reasons = ", ".join(job.reasons) if job.reasons else "match mots-cles"
+    priority_label = "entreprise ciblee" if is_priority_company(job.company) else "score/metier"
+    title = f"#{rank:02d} | score {job.score} | {priority_label} | {job.title}"
     fields = [
         {"name": "Entreprise", "value": job.company or "Non precise", "inline": True},
-        {"name": "Score", "value": str(job.score), "inline": True},
+        {"name": "Niveau", "value": score_label(job.score), "inline": True},
         {"name": "Source", "value": job.partner or "Non precise", "inline": True},
         {"name": "Lieu", "value": shorten(job.location or "Non precise", 120), "inline": False},
         {"name": "Pourquoi", "value": shorten(reasons, 160), "inline": False},
     ]
     return {
-        "title": shorten(job.title, 180),
+        "title": shorten(title, 220),
         "url": job.url,
         "description": shorten(job.description, 260),
-        "color": 0x1F8B4C,
+        "color": 0xF2C94C if is_priority_company(job.company) else 0x1F8B4C,
         "fields": fields,
     }
 
@@ -1052,10 +1064,14 @@ def send_discord(jobs: list[Job]) -> bool:
     for webhook_url in webhooks:
         for start in range(0, len(jobs_to_send), batch_size):
             batch = jobs_to_send[start : start + batch_size]
+            end = start + len(batch)
             payload = {
                 "username": username,
-                "content": f"{mention} {len(batch)} nouvelle(s) offre(s) alternance trouvee(s).".strip(),
-                "embeds": [job_to_discord_embed(job) for job in batch],
+                "content": (
+                    f"{mention} Offres {start + 1}-{end}/{len(jobs_to_send)} "
+                    "triees par priorite entreprise, score puis date."
+                ).strip(),
+                "embeds": [job_to_discord_embed(job, start + index + 1) for index, job in enumerate(batch)],
             }
             request = Request(
                 webhook_url,
@@ -1279,7 +1295,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--set-status", default="", help="UID de l'offre a mettre a jour.")
     parser.add_argument("--notes", default="", help="Note a ajouter avec --set-status.")
     parser.add_argument("--export-csv", action="store_true", help="Exporte le suivi en CSV.")
-    parser.add_argument("--max", type=int, default=25, help="Nombre maximum de nouvelles offres dans l'email.")
+    parser.add_argument("--max", type=int, default=20, help="Nombre maximum de nouvelles offres a traiter par run.")
     return parser.parse_args()
 
 

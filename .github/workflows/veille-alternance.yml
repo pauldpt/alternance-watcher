@@ -19,6 +19,8 @@ jobs:
       REQUIRE_DISCORD: "true"
       DISCORD_MENTION: ${{ secrets.DISCORD_MENTION }}
       DISCORD_USERNAME: "Veille Alternance"
+      DISCORD_MAX_OFFERS: "20"
+      DISCORD_BATCH_SIZE: "5"
       OUTPUT_DIR: ./out
       SEARCH_DEPARTEMENTS: "75,92,93,94,91,78,77,95"
       TARGET_DIPLOMA_LEVEL: "6"
@@ -66,7 +68,7 @@ jobs:
 
       - name: Run watcher
         if: env.RUN_WATCHER == 'true'
-        run: python offres_alternance.py --no-email
+        run: python offres_alternance.py --no-email --max 20
 
       - name: Upload report artifact
         if: always()

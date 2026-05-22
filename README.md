@@ -54,6 +54,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Penalisation des offres moins pertinentes: Business Analyst pur, RH, helpdesk, QA uniquement, reporting Excel pur.
 - Deduplication persistante avec le champ `notified_at`.
 - Notifications Discord avec embeds.
+- Affichage Discord limite a 20 offres par run, organise par priorite puis par score.
 - Notifications email optionnelles.
 - Suivi des candidatures avec statuts: `new`, `to_apply`, `applied`, `follow_up`, `rejected`, `ignored`.
 - Rapports locaux Markdown et export CSV.
@@ -165,6 +166,7 @@ Variables principales:
 - `DISCORD_WEBHOOK_URL`: webhook Discord du salon cible.
 - `DISCORD_WEBHOOK_URLS`: plusieurs webhooks Discord separes par des virgules.
 - `DISCORD_MENTION`: mention optionnelle d'un utilisateur ou d'un role Discord.
+- `DISCORD_MAX_OFFERS`: nombre maximum d'offres envoyees par run, 20 par defaut.
 - `DISCORD_BATCH_SIZE`: nombre d'offres par message Discord, 5 par defaut pour respecter les limites Discord.
 - `SEARCH_DEPARTEMENTS`: departements francais a surveiller.
 - `TARGET_DIPLOMA_LEVEL=6`: niveau Bac+3 / BUT3.
