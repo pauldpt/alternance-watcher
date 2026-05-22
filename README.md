@@ -55,7 +55,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Penalisation des offres moins pertinentes: Business Analyst pur, RH, helpdesk, QA uniquement, reporting Excel pur.
 - Deduplication persistante avec le champ `notified_at`.
 - Notifications Discord avec embeds.
-- Affichage Discord limite a 20 offres par run, organise par priorite puis par score.
+- Affichage Discord limite a 20 offres par run, organise par priorite puis par score numerique.
 - Notifications email optionnelles.
 - Suivi des candidatures avec statuts: `new`, `to_apply`, `applied`, `follow_up`, `rejected`, `ignored`.
 - Rapports locaux Markdown et export CSV.

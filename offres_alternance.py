@@ -1055,23 +1055,13 @@ def discord_configured() -> bool:
     return bool(discord_webhooks())
 
 
-def score_label(score: int) -> str:
-    if score >= 90:
-        return "excellent"
-    if score >= 60:
-        return "tres bon"
-    if score >= 35:
-        return "bon"
-    return "a verifier"
-
-
 def job_to_discord_embed(job: Job, rank: int) -> dict[str, Any]:
     reasons = ", ".join(job.reasons) if job.reasons else "match mots-cles"
     priority_label = "entreprise ciblee" if is_priority_company(job.company) else "score/metier"
     title = f"#{rank:02d} | score {job.score} | {priority_label} | {job.title}"
     fields = [
         {"name": "Entreprise", "value": job.company or "Non precise", "inline": True},
-        {"name": "Niveau", "value": score_label(job.score), "inline": True},
+        {"name": "Score", "value": str(job.score), "inline": True},
         {"name": "Source", "value": job.partner or "Non precise", "inline": True},
         {"name": "Lieu", "value": shorten(job.location or "Non precise", 120), "inline": False},
         {"name": "Pourquoi", "value": shorten(reasons, 160), "inline": False},

@@ -126,8 +126,9 @@ Si 50 offres nouvelles arrivent et que Discord en affiche 20, le bot garde les 2
 DISCORD_BATCH_SIZE=5
 ```
 
-Avec 20 offres, Discord recoit donc 4 messages de 5 offres. Chaque titre contient le rang et le score:
+Avec 20 offres, Discord recoit donc 4 messages de 5 offres. Chaque offre affiche un score numerique clair, sans label subjectif:
 
 ```text
 #01 | score 92 | entreprise ciblee | Alternance DevOps Cloud
+Score: 92
 ```
