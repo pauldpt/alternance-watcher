@@ -289,7 +289,7 @@ class JobStore:
                     "DATABASE_URL pointe vers PostgreSQL/Supabase mais psycopg n'est pas installe. "
                     "Lance: python3 -m pip install -r requirements.txt"
                 ) from exc
-            return cls(psycopg.connect(url, row_factory=dict_row), "postgres")
+            return cls(psycopg.connect(url, row_factory=dict_row, prepare_threshold=None), "postgres")
 
         db_path = sqlite_path_from_url(url)
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -318,6 +318,9 @@ class JobStore:
 
     def commit(self) -> None:
         self.conn.commit()
+
+    def rollback(self) -> None:
+        self.conn.rollback()
 
     def init_schema(self) -> None:
         self.execute(
@@ -1321,6 +1324,7 @@ def main() -> int:
 
         store.finish_run(run_id, "success", len(jobs), len(fresh_jobs), notified_count)
     except Exception as exc:
+        store.rollback()
         store.finish_run(run_id, "error", len(jobs), len(fresh_jobs), 0, str(exc))
         raise
     finally:
